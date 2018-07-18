@@ -3,7 +3,7 @@
 
 require __DIR__ . '/vendor/autoload.php';
 
-use App\Commands\RepositoryParser;
+use App\Commands\RepositoriesParser;
 use Symfony\Component\Console\Application;
 
 $app = new Application;
