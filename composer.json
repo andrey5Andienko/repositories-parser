@@ -9,11 +9,12 @@
     ],
     "require": {
         "symfony/console": "^4.1",
-        "symfony/var-dumper": "^4.1",
         "guzzlehttp/guzzle": "^6.3",
         "symfony/finder": "^4.1"
     },
-    "require-dev": { },
+    "require-dev": {
+        "symfony/var-dumper": "^4.1"
+    },
     "autoload": {
         "psr-4": {
             "App\\": "src/"
