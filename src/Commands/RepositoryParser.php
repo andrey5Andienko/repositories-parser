@@ -29,7 +29,7 @@ class RepositoryParser extends Command
 
     public function configure(): void
     {
-        $this->setName('parseMethodsName')
+        $this->setName('parse:methods-name')
             ->setDescription('Parse names all public and static methods')
             ->addArgument('names', InputArgument::IS_ARRAY, 'Repositories names');
     }
