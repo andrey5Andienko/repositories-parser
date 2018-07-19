@@ -7,6 +7,7 @@ use App\Services\DownloadRepositories;
 use App\Services\ExtractZip;
 use App\Services\MethodsParser;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -15,7 +16,10 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class RepositoriesParser extends Command
 {
+    /** @var ProgressBar */
+    protected $progressBar;
     /** @var string */
+    protected $output;
     const DOWNLOADS_PATH = 'storage';
 
     public function configure(): void
@@ -27,12 +31,11 @@ class RepositoriesParser extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): void
     {
+        $this->output = $output;
         $repositories = $input->getArgument('names');
 
-        $client = new Client($output);
-
-        $downloader = new DownloadRepositories($repositories, static::DOWNLOADS_PATH, $client);
-        $downloader->download();
+        $downloader = new DownloadRepositories($repositories, static::DOWNLOADS_PATH);
+        $downloader->download([$this, 'onProgress']);
 
         $extract = new ExtractZip(static::DOWNLOADS_PATH);
         $extract->extract();
@@ -54,5 +57,30 @@ class RepositoriesParser extends Command
             $filesystem = new Filesystem();
             $filesystem->remove(static::DOWNLOADS_PATH);
         }
+    }
+
+    public function onProgress(int $total, int $downloaded): void
+    {
+        if ($total <= 0) {
+            return;
+        }
+
+        if (!$this->progressBar) {
+            $this->progressBar = $this->createProgressBar(100);
+        }
+
+        $this->progressBar->setProgress(100 / $total * $downloaded);
+    }
+
+    protected function createProgressBar(int $max): ProgressBar
+    {
+        $bar = new ProgressBar($this->output, $max);
+
+        $bar->setBarCharacter('<fg=green>·</>');
+        $bar->setEmptyBarCharacter('<fg=red>·</>');
+        $bar->setProgressCharacter('<fg=green>ᗧ</>');
+        $bar->setFormat("%current:8s%/%max:-8s% %bar% %percent:5s%% %elapsed:7s%/%estimated:-7s% %memory%");
+
+        return $bar;
     }
 }

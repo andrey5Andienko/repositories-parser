@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Client;
 
 class DownloadRepositories
 {
@@ -12,17 +12,13 @@ class DownloadRepositories
     /** @var string */
     protected $folder;
 
-    /** @var ClientInterface */
-    protected $client;
-
-    public function __construct(array $names, string $folder, ClientInterface $client)
+    public function __construct(array $names, string $folder)
     {
         $this->getUrlsFromRepositoriesNames($names);
         $this->folder = $folder;
-        $this->client = $client;
     }
 
-    public function download()
+    public function download(callable $progress)
     {
         foreach ($this->urls as $filename => $url) {
 
@@ -36,11 +32,16 @@ class DownloadRepositories
                 mkdir($dir);
             }
 
-            $this->client->request('get', $url, [
+            $this->getClient()->request('get', $url, [
                 'save_to' => $path,
-                'progress' => [$this->client, 'onProgress'],
+                'progress' => $progress,
             ]);
         }
+    }
+
+    protected function getClient(): Client
+    {
+        return new Client;
     }
 
     protected function getUrlsFromRepositoriesNames(array $repositories)

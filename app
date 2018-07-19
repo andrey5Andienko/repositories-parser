@@ -8,6 +8,6 @@ use Symfony\Component\Console\Application;
 
 $app = new Application;
 
-$app->add(new RepositoryParser);
+$app->add(new RepositoriesParser);
 
 $app->run();
